@@ -25,7 +25,12 @@ RUN sed -i 's/\r$//' docker-entrypoint.sh \
 # caché del modelo Whisper) vive en /data: monta ahí un disco persistente.
 ENV PYTHONUNBUFFERED=1 \
     HUBCLIPS_DATA_DIR=/data \
-    HF_HOME=/data/modelos
+    HF_HOME=/data/modelos \
+    PORT=10000
 
-EXPOSE 8000
+# Render inyecta PORT (10000 por defecto) y el panel escucha en 0.0.0.0:$PORT.
+EXPOSE 10000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD python -c "import os,urllib.request as u; u.urlopen('http://127.0.0.1:%s/healthz' % os.environ.get('PORT','10000'), timeout=4)" || exit 1
+
 ENTRYPOINT ["./docker-entrypoint.sh"]

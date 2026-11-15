@@ -9,3 +9,8 @@ __pycache__/
 .git/
 *_respaldo.py
 subir_prueba.py
+.vscode/
+.gitignore
+*.mkv
+*.mp4
+*.md

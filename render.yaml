@@ -5,6 +5,10 @@ services:
   - type: web
     name: hubclips
     runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    branch: main
+    autoDeploy: true   # cada git push a main despliega solo
     # El disco persistente exige plan de pago. Whisper + FFmpeg necesitan
     # memoria: con 512 MB (starter) puede cerrarse por falta de RAM; usa
     # standard (2 GB) o más si vas a capturar y renderizar a la vez.
@@ -16,6 +20,9 @@ services:
       mountPath: /data
       sizeGB: 20
     envVars:
+      # Render ya inyecta PORT (10000); se fija aquí para que sea explícito.
+      - key: PORT
+        value: "10000"
       # --- Seguridad (obligatorias) ---
       - key: HUBCLIPS_PASSWORD        # contraseña del panel, mín. 12 caracteres
         sync: false                   # Render te la pide al crear el servicio
