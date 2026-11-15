@@ -1,0 +1,42 @@
+# Blueprint de Render: https://render.com/docs/blueprint-spec
+# Un solo servicio web con disco persistente. NO escales a más de 1 instancia:
+# el estado (captura en curso, programador de publicaciones) vive en el proceso.
+services:
+  - type: web
+    name: hubclips
+    runtime: docker
+    # El disco persistente exige plan de pago. Whisper + FFmpeg necesitan
+    # memoria: con 512 MB (starter) puede cerrarse por falta de RAM; usa
+    # standard (2 GB) o más si vas a capturar y renderizar a la vez.
+    plan: standard
+    numInstances: 1
+    healthCheckPath: /healthz
+    disk:
+      name: datos
+      mountPath: /data
+      sizeGB: 20
+    envVars:
+      # --- Seguridad (obligatorias) ---
+      - key: HUBCLIPS_PASSWORD        # contraseña del panel, mín. 12 caracteres
+        sync: false                   # Render te la pide al crear el servicio
+      - key: HUBCLIPS_SECRET_KEY      # cifra los tokens de redes y firma las sesiones
+        generateValue: true           # NO la cambies: perderías los tokens guardados
+      # --- Almacenamiento ---
+      - key: HUBCLIPS_DATA_DIR
+        value: /data
+      # --- OAuth (solo las redes que uses; ver .env.example) ---
+      - key: YOUTUBE_CLIENT_ID
+        sync: false
+      - key: YOUTUBE_CLIENT_SECRET
+        sync: false
+      - key: TIKTOK_CLIENT_KEY
+        sync: false
+      - key: TIKTOK_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_CLIENT_ID
+        sync: false
+      - key: FACEBOOK_CLIENT_SECRET
+        sync: false
+      # Opcional: dominio propio. Por defecto se usa RENDER_EXTERNAL_URL.
+      - key: OAUTH_BASE_URL
+        sync: false

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hubclips</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<aside>
+  <a class="logo" href="/" aria-label="Hubclips, inicio">
+    <span class="logo-marca" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8b5cff"/><stop offset=".55" stop-color="#5b7bff"/>
+            <stop offset="1" stop-color="#22d3ee"/>
+          </linearGradient>
+          <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dfe6ff"/>
+          </linearGradient>
+        </defs>
+        <rect width="40" height="40" rx="12" fill="url(#lg1)"/>
+        <rect x=".75" y=".75" width="38.5" height="38.5" rx="11.25" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+        <rect x="9" y="9" width="22" height="22" rx="6" fill="none" stroke="url(#lg2)" stroke-width="2.2" stroke-dasharray="26 6" stroke-linecap="round"/>
+        <path d="M17 14.5v11l9-5.5z" fill="url(#lg2)"/>
+        <circle cx="31.5" cy="8.5" r="2.4" fill="#fff"/>
+      </svg>
+    </span>
+    <span class="logo-texto">
+      <span class="logo-nombre">Hub<em>clips</em></span>
+      <span class="logo-lema">Clip studio</span>
+    </span>
+  </a>
+  <nav aria-label="Secciones">
+    <section class="grupo-nav" data-grupo="biblioteca">
+      <button class="grupo-cab" type="button" aria-expanded="true" aria-controls="g-biblioteca">
+        <span>Biblioteca</span>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="grupo-cuerpo" id="g-biblioteca"><div class="grupo-int">
+        <button class="nav-item activo" data-filtro="todos"><span>Todos los clips</span><span id="n-todos">0</span></button>
+        <button class="nav-item" data-filtro="listo"><span>Subtitulados</span><span id="n-listo">0</span></button>
+        <button class="nav-item" data-filtro="proceso"><span class="et-proceso">En proceso</span><span id="n-proceso">0</span></button>
+      </div></div>
+    </section>
+    <section class="grupo-nav" data-grupo="publicacion">
+      <button class="grupo-cab" type="button" aria-expanded="true" aria-controls="g-publicacion">
+        <span>Publicación</span>
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="grupo-cuerpo" id="g-publicacion"><div class="grupo-int">
+        <button class="nav-item" data-filtro="auto"><span>Automatización</span><span id="n-auto">0</span></button>
+      </div></div>
+    </section>
+  </nav>
+  <div class="pie">Panel local · se actualiza solo</div>
+</aside>
+
+<main>
+  <section class="generador">
+    <form id="form-captura">
+      <input id="url" type="url" required autocomplete="off"
+             placeholder="Pega la URL de un directo de YouTube…"
+             aria-label="URL del directo de YouTube">
+      <label class="duracion" title="Duración máxima de cada clip">
+        <span>Máx.</span>
+        <select id="duracion" aria-label="Duración máxima de cada clip">
+          <option value="30">30 s</option>
+          <option value="60" selected>60 s</option>
+          <option value="90">90 s</option>
+        </select>
+      </label>
+      <button class="boton" id="generar" type="submit">Generar clips</button>
+    </form>
+    <div id="captura" hidden></div>
+  </section>
+
+  <section class="stats" id="stats" aria-label="Resumen de la biblioteca" hidden>
+    <div class="stat"><span class="et">Clips</span><b id="st-total">0</b><small id="st-dur"></small></div>
+    <div class="stat"><span class="et">Subtitulados</span><b id="st-listo">0</b><small id="st-pct"></small></div>
+    <div class="stat"><span class="et">Viral Score medio</span><b id="st-medio">—</b><small id="st-medio-n"></small></div>
+    <div class="stat destacada"><span class="et">Mejor clip</span><b id="st-mejor">—</b><small id="st-mejor-f"></small></div>
+  </section>
+
+  <div class="cabecera">
+    <h1 id="titulo">Todos los clips</h1>
+    <span id="estado"></span>
+    <label class="ordenar" id="caja-orden">Ordenar
+      <select id="orden">
+        <option value="recientes">Más recientes</option>
+        <option value="viral">Mayor Viral Score</option>
+      </select>
+    </label>
+  </div>
+  <div id="rejilla"></div>
+  <p id="vacio" hidden>No hay clips en esta vista.</p>
+
+  <section id="auto" hidden>
+    <p class="intro-auto">
+      Cada publicación exporta el clip en <b>vertical 9:16 con los subtítulos quemados</b>,
+      deja un paquete (<code>.mp4</code> + <code>.txt</code> + <code>.json</code>) en la carpeta del destino
+      y, si la cuenta está conectada, lo <b>sube con la API oficial</b>: «Enviar a borrador» lo deja
+      privado o como borrador, y «Programar subida» lo publica a la hora elegida (mientras este panel
+      esté abierto).
+    </p>
+    <h2 class="sub-titulo">Redes sociales</h2>
+    <div id="lista-redes" class="redes"></div>
+    <p class="intro-auto">Pulsa «Conectar» para autorizar tu cuenta. Los tokens se guardan en
+      <code>destinos.json</code> <b>cifrados con tu usuario de Windows</b> y nunca llegan al navegador.
+      Las claves de tu aplicación (<code>YOUTUBE_CLIENT_ID</code>, <code>TIKTOK_CLIENT_SECRET</code>…)
+      se leen del archivo <code>.env</code>. Las redes limitan las apps sin revisar: YouTube las deja en
+      privado, TikTok solo permite privado hasta auditar la app y Meta exige revisión fuera de cuentas con rol.</p>
+    <h2 class="sub-titulo">Otros destinos</h2>
+    <div id="lista-destinos" class="destinos"></div>
+    <h2 class="sub-titulo">Registro de publicaciones</h2>
+    <div id="lista-pub"></div>
+    <p id="sin-pub" class="sin-texto" hidden>Todavía no has enviado ningún clip. Abre un clip y usa «Publicar en redes».</p>
+  </section>
+
+  <section id="procesos" hidden>
+    <div class="stats proc-stats" id="proc-stats" hidden>
+      <div class="stat"><span class="et">En marcha</span><b id="ps-act">0</b><small>tareas activas ahora</small></div>
+      <div class="stat"><span class="et">En espera</span><b id="ps-cola">0</b><small>pendientes de turno</small></div>
+      <div class="stat destacada"><span class="et">Captura en vivo</span><b id="ps-cap">—</b><small id="ps-cap-s">sin captura</small></div>
+    </div>
+    <div id="lista-procesos"></div>
+    <div id="sin-procesos" hidden>
+      <div class="vacio-ico" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-3.1-6.3"/><path d="M20 4v5h-5"/><path d="M9.5 9.5l5 2.5-5 2.5z"/></svg>
+      </div>
+      <strong>Todo en calma</strong>
+      <p>No hay ninguna tarea en marcha. Pega la URL de un directo arriba y pulsa
+      «Generar clips»: verás aquí cada paso, en vivo.</p>
+      <ol class="pasos-proc">
+        <li><b>1</b><span>Captura<br><small>se graba el directo</small></span></li>
+        <li><b>2</b><span>Detección<br><small>audio y contenido</small></span></li>
+        <li><b>3</b><span>Subtítulos<br><small>IA local</small></span></li>
+        <li><b>4</b><span>Viral Score<br><small>puntuación</small></span></li>
+      </ol>
+      <button type="button" class="boton" id="ir-url">Pegar una URL</button>
+    </div>
+  </section>
+</main>
+
+<div id="aviso" role="status" hidden></div>
+
+<dialog id="visor">
+  <div class="escena">
+    <div class="marco" id="marco">
+      <canvas id="fondo" width="48" height="86"></canvas>
+      <video id="video" controls controlslist="nofullscreen" playsinline preload="metadata"></video>
+      <div id="subs" class="karaoke"></div>
+    </div>
+    <button class="nav-clip ant" id="prev2" type="button" aria-label="Clip anterior" tabindex="-1">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="nav-clip sig" id="sig2" type="button" aria-label="Clip siguiente" tabindex="-1">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="lateral" data-tab="resumen">
+    <header class="vh">
+      <div class="vh-info">
+        <h2 id="v-titulo"></h2>
+        <div class="sub" id="v-sub"></div>
+        <div class="vh-chips" id="v-chips"></div>
+      </div>
+      <div class="vh-botones">
+        <button class="icono" id="prev" type="button" title="Clip anterior (←)" aria-label="Clip anterior">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <span class="posicion" id="posicion" aria-live="polite"></span>
+        <button class="icono" id="sig" type="button" title="Clip siguiente (→)" aria-label="Clip siguiente">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button class="icono" id="pantalla" type="button" title="Pantalla completa" aria-label="Pantalla completa">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button class="icono" id="cerrar" type="button" title="Cerrar (Esc)" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Secciones del clip">
+      <button type="button" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+      <button type="button" role="tab" data-tab="transcripcion" aria-selected="false">Transcripción</button>
+      <button type="button" role="tab" data-tab="publicar" aria-selected="false">Publicar</button>
+    </div>
+
+    <div class="lateral-cuerpo">
+    <details class="pub" id="pub-sec" data-panel="publicar" open>
+      <summary>📤 Publicar en redes</summary>
+      <div class="pub-form">
+        <p class="nota-pub" id="pub-resumen"></p>
+        <label>Destino
+          <select id="pub-destino"></select>
+        </label>
+        <label>Título <span class="cnt" id="pub-cnt-t"></span>
+          <input id="pub-titulo" type="text" autocomplete="off" placeholder="Título del vídeo">
+        </label>
+        <label>Descripción <span class="cnt" id="pub-cnt-d"></span>
+          <textarea id="pub-desc" rows="3" placeholder="Texto que acompañará al vídeo"></textarea>
+        </label>
+        <label>Hashtags
+          <input id="pub-tags" type="text" autocomplete="off" placeholder="#fyp #shorts">
+        </label>
+        <label>Programar para
+          <input id="pub-fecha" type="datetime-local">
+        </label>
+        <div class="pub-botones">
+          <button class="boton" id="pub-borrador" type="button">Enviar a borrador</button>
+          <button class="secundario" id="pub-programar" type="button">Programar subida</button>
+        </div>
+        <p class="nota-pub" id="pub-aviso"></p>
+        <div id="pub-lista"></div>
+      </div>
+    </details>
+
+    <section id="viral-panel" data-panel="resumen"></section>
+
+    <section data-panel="resumen">
+      <h4>Formato 9:16</h4>
+      <div class="segmentado" id="ajustes">
+        <button data-ajuste="adaptar" class="activo">Adaptar (fondo difuminado)</button>
+        <button data-ajuste="recorte">Recortar</button>
+      </div>
+    </section>
+
+    <section data-panel="resumen">
+      <h4>Estilo de subtítulos</h4>
+      <div class="estilos" id="estilos">
+        <p class="sin-texto">Cargando plantillas…</p>
+      </div>
+      <p class="ayuda-edicion" style="margin-top:8px">
+        La plantilla elegida se recuerda para este clip y se usa al descargar.
+      </p>
+    </section>
+
+    <section data-panel="transcripcion">
+      <h4>Transcripción</h4>
+      <p class="ayuda-edicion" id="ayuda-edicion" hidden>
+        Haz clic en el texto para corregirlo (Intro confirma, Esc deshace la línea).
+        La hora salta a ese momento del vídeo.
+      </p>
+      <div id="lineas"></div>
+      <div id="barra-subs" hidden>
+        <button class="boton" id="guardar-subs" type="button">Guardar cambios</button>
+        <button class="secundario" id="descartar-subs" type="button">Descartar</button>
+        <span class="nota" id="nota-subs"></span>
+      </div>
+    </section>
+    </div>
+
+    <footer class="vf">
+      <div class="vf-fila">
+        <button class="boton" id="descargar" type="button">⬇ Descargar clip</button>
+        <button class="peligro" id="eliminar" type="button" title="Eliminar clip" aria-label="Eliminar clip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg></button>
+      </div>
+      <div class="sub" id="aviso-desc">9:16 con el formato y los subtítulos elegidos, quemados en el vídeo.</div>
+      <a class="sub" id="original" download>Descargar original sin procesar</a>
+    </footer>
+  </div>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.venv/
+datos/
+destinos.json
+__pycache__/
+*.pyc

@@ -1,0 +1,17 @@
+# Dependencias de Hubclips (Python 3.10+; probado con 3.12).
+# FFmpeg y ffprobe NO se instalan con pip: ver Dockerfile.
+
+# Captura del directo
+yt-dlp>=2026.10.26
+
+# Subtítulos y análisis con IA local (arrastra ctranslate2, av, numpy...)
+faster-whisper>=1.2.1,<2
+
+# Cifrado de tokens en Linux/nube (Fernet con HUBCLIPS_SECRET_KEY)
+cryptography>=43
+
+# Opcional: subida de clips a Supabase (SUBIR_CLIPS = True en captura_buffer.py)
+# supabase
+# python-dotenv
+
+# El panel web usa solo la biblioteca estándar de Python (no FastAPI/Flask).

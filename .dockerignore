@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.venv/
+datos/
+destinos.json
+__pycache__/
+*.pyc
+.git/
+*_respaldo.py
+subir_prueba.py
