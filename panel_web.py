@@ -2,9 +2,9 @@
 
 Solo usa la biblioteca estándar. Uso:
 
-    python panel_web.py [--puerto 8000] [--clips RUTA]
+    python panel_web.py [--puerto 10000] [--clips RUTA]
 
-Y abre http://127.0.0.1:8000
+Y abre http://127.0.0.1:10000
 """
 import argparse
 import gzip
@@ -1384,18 +1384,14 @@ class ServidorPanel(ThreadingHTTPServer):
 
 
 def main():
-    # En la nube (Render, etc.) la plataforma fija PORT y hay que escuchar en
-    # 0.0.0.0. En local se mantiene 127.0.0.1:8000, que no expone el panel.
-    en_nube = bool(os.environ.get("PORT"))
-
+    # Render fija PORT; si no existe se usa 10000 (el valor por defecto de
+    # Render). Escucha en 0.0.0.0 salvo que HUBCLIPS_HOST/--host diga otra cosa.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--host",
-        default=os.environ.get("HUBCLIPS_HOST")
-        or ("0.0.0.0" if en_nube else "127.0.0.1"),
+        "--host", default=os.environ.get("HUBCLIPS_HOST") or "0.0.0.0"
     )
     parser.add_argument(
-        "--puerto", type=int, default=int(os.environ.get("PORT", 8000))
+        "--puerto", type=int, default=int(os.environ.get("PORT") or 10000)
     )
     parser.add_argument(
         "--clips",
